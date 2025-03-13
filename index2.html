@@ -1,0 +1,214 @@
+<!-- Include Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+<!-- Full-Width Game Layout -->
+<div class="container-fluid d-flex justify-content-center align-items-center min-vh-100 bg-light">
+  <div class="row w-100 justify-content-center">
+    <!-- Card Container -->
+    <div class="col-12 col-md-6 col-lg-4 text-center p-4">
+      <div class="card shadow-lg p-4" style="border-radius: 15px; background: linear-gradient(135deg, #f06292, #ff8a80);">
+        <div class="card-body">
+          <h5 class="card-title mb-4 text-white fs-2 fw-bold">Task Drawer Game</h5>
+          
+          <!-- Button to draw task -->
+          <button id="draw-card-btn" class="btn btn-light w-100 p-3 fs-5 fw-bold rounded-3 shadow-sm hover-shadow-lg mb-4">
+            Draw Task
+          </button>
+
+          <!-- Card Display -->
+          <div id="card-container" class="card mt-4 p-3" style="cursor: pointer; background-color: #fff; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <div id="card" class="card-body p-4">
+              <!-- Front of the card -->
+              <div class="front">
+                <p class="card-text text-center fs-4">Click to draw a task</p>
+              </div>
+              <!-- Back of the card (hidden initially) -->
+              <div class="back" style="display: none;">
+                <p class="card-text text-center fs-4" id="task">Task content will appear here...</p>
+                <p class="card-text text-center fs-6 text-muted" id="category">Category: </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Include Bootstrap JS and Popper.js for smooth animations -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+
+<!-- JavaScript to handle the task drawing logic -->
+<script>
+// Arrays holding tasks
+const dirtyTasks = [
+  "Kiss me passionately for 1 minute.",
+  "Give me a slow lap dance for 30 seconds.",
+  "Whisper your secret fantasy in my ear.",
+  "Take off one item of clothing of your choice.",
+  "Feed your partner something sweet while blindfolded.",
+  "Give me a seductive stare for 30 seconds.",
+  "Play with my hair while giving me a kiss.",
+  "Use your partner’s favorite body part to tease them for 1 minute.",
+  "Give your partner a passionate kiss, but you can't touch their lips.",
+  "Role-play a sexy scenario for 2 minutes (e.g., teacher and student, boss and employee).",
+  "Let your partner take control and tell you what to do for the next round.",
+  "Slowly kiss every inch of my neck and shoulders.",
+  "Gently massage your partner’s feet for 2 minutes while maintaining eye contact.",
+  "Whisper naughty things in my ear while touching my body.",
+  "Give me a slow, seductive kiss while holding me tightly.",
+  "Sit on your partner’s lap and slowly grind for 1 minute.",
+  "Pretend you’re a secret admirer and give your partner a surprise kiss.",
+  "Use a feather or soft object to gently caress my skin.",
+  "Let your partner take a sexy picture of you (no faces, just body).",
+  "Tease your partner by kissing them everywhere except their lips for 2 minutes.",
+  "Tell me your biggest fantasy, and let’s talk about it for a minute.",
+  "Slowly undress your partner while maintaining intense eye contact.",
+  "Give your partner a passionate kiss on the chest.",
+  "Imitate the sound of a passionate kiss and make it realistic.",
+  "Play with her cats for 5mins while she's talking to you",
+  "Sit on his face",
+  "Seduce him while doing squats",
+  "Seduce her while doing squats",
+  "Gomu's wish",
+  "Gomu's wish",
+  "Gomu's wish",
+  "Gomu's wish",
+  "Gomu's wish",
+  "Gomu's wish",
+  "Gomu's wish",
+  "Gomu's wish",
+  "Lick her underarms",
+  "Bite his hands",
+  "Tie him and play with him for 5 mins",
+  "Blindfold and tease him",
+  "Put your hands under his pants and play with his gun",
+  "Beg him to do something to entertain your sex desire",
+  "He's your servant, ask anything to do (better be dirty)",
+  "Pinch her nipples for 5 mins",
+  "Play with his nipples for 5 mins",
+  "Seduce him by whispering in his ear, he can't move",
+  "Kiss and play with her thighs",
+  "playy with his body part which you like the most for 5 mins"
+];
+
+const romanticTasks = [
+  "Give your partner a 2-minute massage.",
+  "Tell me one thing you love about me right now.",
+  "Hold hands and stare into each other's eyes for 1 minute.",
+  "Give a slow and meaningful kiss on the forehead.",
+  "Share your favorite memory of us together.",
+  "Give your partner a long hug for 2 minutes.",
+  "Send your partner a text message telling them all the reasons you love them.",
+  "Gomu's wish",
+  "Gomu's wish",
+  "Gomu's wish",
+  "Gomu's wish",
+  "Gomu's wish",
+  "Gomu's wish",
+  "Gomu's wish",
+  "Gomu's wish",
+  "Give your partner a soft kiss on the back of their neck.",
+  "Hold each other and share a quiet moment in each other's arms for 5 minutes.",
+  "Cuddle with your partner.",
+  "Mimic your partner’s personality.",
+  "Give your partner a kiss and say three things you admire about them.",
+  "Create a playlist of songs that remind you of your partner and listen to it together.",
+  "Tell me the first time you realized you were in love with me.",
+  "Give your partner a warm hug from behind while whispering sweet things in their ear.",
+  "Reenact the first time you met and talk about the memories of that moment."
+];
+
+// Variables to track used tasks
+let usedDirtyTasks = [];
+let usedRomanticTasks = [];
+
+// Get elements
+const drawCardButton = document.getElementById('draw-card-btn');
+const taskDisplay = document.getElementById('task');
+const categoryDisplay = document.getElementById('category');
+const card = document.getElementById('card');
+
+// Function to pick a random task from an array
+function getRandomTask(tasks, usedTasks) {
+  const availableTasks = tasks.filter(task => !usedTasks.includes(task));
+
+  if (availableTasks.length === 0) {
+    usedTasks.length = 0; // Clear the used tasks array
+    return getRandomTask(tasks, usedTasks); // Try again with a fresh deck
+  }
+
+  const randomIndex = Math.floor(Math.random() * availableTasks.length);
+  return availableTasks[randomIndex];
+}
+
+// Handle button click
+drawCardButton.addEventListener('click', () => {
+  // Randomly decide the task type (dirty or romantic)
+  const isDirtyTask = Math.random() > 0.5;
+  let task, category;
+
+  if (isDirtyTask) {
+    task = getRandomTask(dirtyTasks, usedDirtyTasks);
+    category = "Dirty Task";
+    usedDirtyTasks.push(task); // Mark this task as used
+  } else {
+    task = getRandomTask(romanticTasks, usedRomanticTasks);
+    category = "Romantic Task";
+    usedRomanticTasks.push(task); // Mark this task as used
+  }
+
+  // Display task and category
+  taskDisplay.textContent = task;
+  categoryDisplay.textContent = `Category: ${category}`;
+
+  // Show back of card with a smooth fade
+  const cardBack = card.querySelector('.back');
+  const cardFront = card.querySelector('.front');
+
+  // Show the back of the card after a short delay
+  cardFront.style.display = 'none';
+  cardBack.style.display = 'block';
+
+  // Add a class to animate the transition of the card
+  card.classList.add('card-flip');
+//   card.classList.add('card-flip');
+});
+
+// Handle the card click to flip back to front after content is revealed
+card.addEventListener('click', () => {
+  const cardBack = card.querySelector('.back');
+  const cardFront = card.querySelector('.front');
+
+  // Flip the card back
+  cardBack.style.display = 'none';
+  cardFront.style.display = 'block';
+  card.classList.remove('card-flip');
+});
+</script>
+
+<!-- CSS for Animation -->
+<style>
+  .card-flip {
+    transform: rotateY(360deg);
+    transition: transform 1.5s ease;
+  }
+  .front, .back {
+    backface-visibility: hidden;
+  }
+  .back {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+</style>
